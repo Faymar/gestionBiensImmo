@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-    <title>Dashboard - NiceAdmin Bootstrap Template</title>
+    <title>{{ config('app.name', 'Laravel') }}</title>
     <meta content="" name="description">
     <meta content="" name="keywords">
 
@@ -33,91 +33,105 @@
     <header id="header" class="header fixed-top d-flex align-items-center">
 
         <div class="d-flex align-items-center justify-content-between">
-            <a href="index.html" class="logo d-flex align-items-center">
-                <img src="asset/img/logo.png" alt="">
+            <a href="/" class="logo d-flex align-items-center">
                 <span class="d-none d-lg-block">ATELIER 17</span>
             </a>
         </div><!-- End Logo -->
-
-
         <nav class="header-nav ms-auto">
             <ul class="d-flex align-items-center">
-                <li class="nav-item dropdown pe-3">
+                @guest
+                @if (Route::has('login'))
+                <li class="nav-item">
+                    <a class="nav-link nav-profile d-flex align-items-center m-1" href="{{ route('login') }}"><b>{{ __('Se Connecter') }}</b></a>
+                </li>
+                @endif
 
+                @if (Route::has('register'))
+                <li class="nav-link nav-profile d-flex align-items-center m-2">
+                    <a class="nav-link" href="{{ route('register') }}"><b>{{ __('Creer Un Compte') }}</b></a>
+                </li>
+                @endif
+                @else
+                <li class="nav-item dropdown pe-3">
                     <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
                         <i class="bi bi-person"></i>
-                        <span class="d-none d-md-block dropdown-toggle ps-2">K. Anderson</span>
+                        <span class="d-none d-md-block dropdown-toggle ps-2">Mon compte</span>
                     </a><!-- End Profile Iamge Icon -->
 
                     <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
                         <li class="dropdown-header">
-                            <h6>Kevin Anderson</h6>
-                            <span>Web Designer</span>
+                            <h6>{{ Auth::user()->name }}</h6>
+                            <span>{{ Auth::user()->prenom }}</span>
                         </li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
-
+                        @if (Auth::user()->role == 1)
                         <li>
-                            <a class="dropdown-item d-flex align-items-center" href="users-profile.html">
+                            <a class="dropdown-item d-flex align-items-center" href="{{'/admin/dashboard'}}">
                                 <i class="bi bi-person"></i>
-                                <span>My Profile</span>
+                                <span>Dashboard</span>
                             </a>
                         </li>
+                        @else
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center" href="{{'/user/profile'}}">
+                                <i class="bi bi-person"></i>
+                                <span>Mon Profile</span>
+                            </a>
+                        </li>
+                        @endif
+
                         <li>
                             <hr class="dropdown-divider">
                         </li>
-
                         <li>
-                            <a class="dropdown-item d-flex align-items-center" href="users-profile.html">
-                                <i class="bi bi-gear"></i>
-                                <span>Account Settings</span>
-                            </a>
-                        </li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-
-                        <li>
-                            <a class="dropdown-item d-flex align-items-center" href="pages-faq.html">
-                                <i class="bi bi-question-circle"></i>
-                                <span>Need Help?</span>
-                            </a>
-                        </li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-
-                        <li>
-                            <a class="dropdown-item d-flex align-items-center" href="#">
+                            <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault();
+                                                     document.getElementById('logout-form').submit();">
                                 <i class="bi bi-box-arrow-right"></i>
-                                <span>Sign Out</span>
+
+                                {{ __('Se deconnecter') }}
                             </a>
+
+                            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                @csrf
+                            </form>
                         </li>
 
                     </ul><!-- End Profile Dropdown Items -->
                 </li><!-- End Profile Nav -->
 
+                @endguest
+
             </ul>
         </nav><!-- End Icons Navigation -->
-
     </header><!-- End Header -->
 
+    @if(count($errors) >0)
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-octagon me-1"></i>
+        @foreach($errors->all() as $error)
+        {{$error}}
+        @endforeach
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
 
+    @if (session('status'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-1"></i>
+        {{ session('status') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
 
-    <main id="main" class="main">
-        <section class="section ">
+    <div class="container py-5">
+        <section class="section register min-vh-100 py-5">
             <div class="row">
                 @yield('contenueUser')
             </div>
         </section>
-
-    </main><!-- End #main -->
-
-
-
-    <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-
+    </div>
     <!-- Vendor JS Files -->
     <script src="{{asset('vendor/apexcharts/apexcharts.min.js')}}"></script>
     <script src="{{asset('vendor/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
