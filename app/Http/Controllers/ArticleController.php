@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
+use App\Models\Commentaire;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Storage;
 
 class ArticleController extends Controller
 {
@@ -64,7 +65,8 @@ class ArticleController extends Controller
     public function voirDetails($id)
     {
         $article = Article::findOrFail($id);
-        return view('article.voirDetails', compact('article'));
+        $commentaire = Commentaire::where('article_id', '=', $id)->get();
+        return view('article.voirDetails', compact('article', 'commentaire'));
     }
 
 
@@ -80,27 +82,29 @@ class ArticleController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Article $article, $id)
+    public function update(Request $request, $id)
     {
-        $validatedData = $request->validate([
+        $request->validate([
             'nom' => 'required',
             'description' => 'required',
-            'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'type' => 'required',
             'statut' => 'required',
 
         ]);
-
-        $imagePath = $request->file('image')->store('images/article', 'public');
+        $article = Article::findOrFail($id);
+        if ($request->file('image')) {
+            $imagePath = $request->file('image')->store('images/article', 'public');
+            $article->image = $imagePath;
+        }
         $article->nom = $request->nom;
         $article->description = $request->description;
-        $article->image = $imagePath;
         $article->type = $request->type;
         $article->statue = $request->statut;
-        $article->save();
 
-        $article->update($validatedData);
-        return back()->with('success', 'Article mis à jour avec succès');
+        $article->update();
+
+        return back()->with('status', 'Article mis à jour avec succès');
     }
 
     /**
@@ -109,6 +113,8 @@ class ArticleController extends Controller
     public function destroy($id)
     {
         $article = Article::findOrFail($id);
+        Storage::disk('public')->delete($article->image);
+
         $article->delete();
         return back()->with('success', 'Article supprimer avec succès');
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
+use App\Models\Commentaire;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -34,7 +35,8 @@ class UserController extends Controller
     }
     public function commentaires()
     {
-        return view('admin.commentaires');
+        $commentaire = Commentaire::all();
+        return view('admin.commentaires', compact('commentaire'));
     }
 
     public function ajouter()
